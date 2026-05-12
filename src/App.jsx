@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { motion, useMotionValue, useSpring, useScroll, useTransform } from "framer-motion";
+import { motion, useMotionValue, useSpring } from "framer-motion";
 import { ArrowUpRight, Music2, ShoppingBag, Mail, Play, Sparkles } from "lucide-react";
 
 export default function App() {
@@ -9,13 +9,15 @@ export default function App() {
   const smoothY = useSpring(mouseY, { stiffness: 120, damping: 20 });
   const [hovering, setHovering] = useState(false);
 
-  const { scrollYProgress } = useScroll();
-  const introScale = useTransform(scrollYProgress, [0, 0.18], [1, 2.8]);
-  const introOpacity = useTransform(scrollYProgress, [0, 0.14, 0.22], [1, 0.5, 0]);
-  const introY = useTransform(scrollYProgress, [0, 0.2], [0, -180]);
-  const introRotateX = useTransform(scrollYProgress, [0, 0.2], [0, 18]);
-  const siteY = useTransform(scrollYProgress, [0, 0.2], [160, 0]);
-  const siteOpacity = useTransform(scrollYProgress, [0, 0.12, 0.22], [0.15, 0.5, 1]);
+  const [introVisible, setIntroVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIntroVisible(false);
+    }, 1400);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const move = (e) => {
@@ -73,48 +75,41 @@ export default function App() {
         style={{ x: smoothX, y: smoothY, translateX: "-50%", translateY: "-50%", scale: hovering ? 2 : 1 }}
       />
       <motion.div
-        className="pointer-events-none fixed z-40 hidden h-80 w-80 rounded-full bg-fuchsia-500/10 blur-2xl md:block"
+        className="pointer-events-none fixed z-40 hidden h-80 w-80 rounded-full bg-fuchsia-500/20 blur-3xl md:block"
         style={{ x: smoothX, y: smoothY, translateX: "-50%", translateY: "-50%" }}
       />
 
-      <section className="relative h-[220vh] bg-black">
-        <motion.div
-          className="sticky top-0 z-30 flex h-screen items-center justify-center overflow-hidden bg-black"
-          style={{ opacity: introOpacity }}
+      {introVisible && (
+        <motion.section
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 0 }}
+          transition={{ duration: 0.65, delay: 0.95, ease: "easeInOut" }}
+          className="fixed inset-0 z-[999] flex items-center justify-center bg-black"
+          onAnimationComplete={() => setIntroVisible(false)}
         >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),transparent_35%)]" />
           <motion.div
-            style={{ scale: introScale, y: introY, rotateX: introRotateX }}
-            className="relative text-center [transform-style:preserve-3d]"
+            initial={{ opacity: 0, y: 18, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="text-center"
           >
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="mb-6 text-xs font-bold uppercase tracking-[0.6em] text-white/40 md:text-sm"
-            >
+            <p className="mb-5 text-xs font-bold uppercase tracking-[0.55em] text-white/35 md:text-sm">
               music management
-            </motion.p>
-            <motion.h1
-              initial={{ opacity: 0, scale: 0.92, filter: "blur(14px)" }}
-              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-              transition={{ duration: 1.1, ease: "easeOut" }}
-              className="text-6xl font-black uppercase tracking-[-0.08em] text-white md:text-8xl lg:text-[11rem]"
-            >
+            </p>
+            <h1 className="text-5xl font-black uppercase tracking-[-0.07em] text-white md:text-8xl lg:text-[9rem]">
               Wave Division
-            </motion.h1>
+            </h1>
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: "100%" }}
-              transition={{ duration: 1.2, delay: 0.4 }}
-              className="mx-auto mt-8 h-px max-w-3xl bg-white/30"
+              transition={{ duration: 0.9, delay: 0.25 }}
+              className="mx-auto mt-7 h-px max-w-2xl bg-white/30"
             />
-            <p className="mt-8 text-sm uppercase tracking-[0.4em] text-white/35">scroll to enter</p>
           </motion.div>
-        </motion.div>
-      </section>
+        </motion.section>
+      )}
 
-      <motion.div style={{ y: siteY, opacity: siteOpacity }} className="relative -mt-[120vh]">
+      <motion.div className="relative">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.16),transparent_35%),linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:100%_100%,70px_70px,70px_70px]" />
         <div className="absolute left-1/2 top-20 h-96 w-96 -translate-x-1/2 rounded-full bg-fuchsia-500/20 blur-[120px]" />
         <div className="absolute bottom-20 right-10 h-96 w-96 rounded-full bg-cyan-500/20 blur-[120px]" />
